@@ -94,7 +94,7 @@ export default function ConversationList({
                 onClose={() => setIsModalOpen(false)}
             />
             <aside
-                className={` hidden lg:block fixed pb-20 lg:left-12 lg:w-60 overflow-y-auto z-40 py-2
+                className={`  lg:block fixed pb-20 lg:left-12 lg:w-60 overflow-y-auto z-40 py-2
         ${isOpen ? "" : "block w-full left-0"}
         `}
             >

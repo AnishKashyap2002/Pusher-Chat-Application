@@ -17,7 +17,7 @@ export default async function ConversationsLayout({
     return (
         <AuthContext>
             <Sidebar>
-                <div className="h-full">
+                <div className="h-full relative">
                     <ConversationList
                         users={users}
                         initialItems={conversations}
