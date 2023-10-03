@@ -9,7 +9,7 @@ const useConversation = () => {
             return "";
         }
         return params.conversationId as string;
-    }, [params.conversationId]);
+    }, [params?.conversationId]);
 
     // !! used to create it to boolean
     const isOpen = useMemo(() => !!conversationId, [conversationId]);
