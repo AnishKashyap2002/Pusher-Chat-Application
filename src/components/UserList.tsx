@@ -12,7 +12,7 @@ export default function UserList({ users }: UserListProps) {
             className=" fixed
          lg:left-20 lg:w-80
          overflow-auto
-    bg-gray-100 h-full w-fit z-30 pb-20"
+    bg-gray-100 h-full w-full z-30 pb-20"
         >
             <div className="px-4 py-2 flex flex-col flex-1 gap-2">
                 <h1 className="text-lg font-bold ">People</h1>
