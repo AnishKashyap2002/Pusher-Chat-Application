@@ -61,9 +61,12 @@ export default function Header({ conversation }: HeaderProps) {
                 </div>
                 <HiEllipsisHorizontal
                     size={32}
-                    onClick={() => setDrawerOpen(true)}
+                    onClick={() => {
+                        console.log("It is open");
+                        return setDrawerOpen(true);
+                    }}
                     className={
-                        "text-sky-500 z-50 cursor-pointer hover:text-sky-600"
+                        "text-sky-500  cursor-pointer hover:text-sky-600"
                     }
                 />
             </div>

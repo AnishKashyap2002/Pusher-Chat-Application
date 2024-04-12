@@ -61,7 +61,7 @@ const ProfileDrawer = ({ onClose, isOpen, data }: ProfileDrawerProps) => {
             >
                 <Dialog
                     as="div"
-                    className="relative z-10"
+                    className="relative z-50"
                     onClose={onClose}
                 >
                     <Transition.Child

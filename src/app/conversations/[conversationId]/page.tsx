@@ -27,7 +27,7 @@ export default async function ConversationId({ params }: { params: Params }) {
     }
     return (
         <div className="lg:ml-80  lg:z-10 z-50 absolute  h-full  lg:w-[700px] w-full bg-white">
-            <div className="flex flex-col h-full w-full">
+            <div className="flex flex-col h-full w-full ">
                 <Header conversation={conversation} />
                 <Body intialMessages={messages} />
                 <Form />
