@@ -64,7 +64,7 @@ const AuthForm = () => {
                     toast.error("Invalid Credentials");
                 }
                 if (callback?.ok) {
-                    toast.success("Logged In");
+                    router.push("/conversations");
                 }
             })
             .finally(() => {

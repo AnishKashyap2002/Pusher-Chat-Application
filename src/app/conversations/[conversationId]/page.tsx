@@ -18,7 +18,7 @@ export default async function ConversationId({ params }: { params: Params }) {
 
     if (!conversation) {
         return (
-            <div className="lg:pl-80 h-full">
+            <div className="lg:ml-80 h-full">
                 <div className="h-full flex flex-col">
                     <EmptyState />
                 </div>
@@ -26,7 +26,7 @@ export default async function ConversationId({ params }: { params: Params }) {
         );
     }
     return (
-        <div className="lg:pl-80 z-50 absolute w-full h-full bg-white">
+        <div className="lg:ml-80  lg:z-10 z-50 absolute  h-full  lg:w-[700px] w-full bg-white">
             <div className="flex flex-col h-full w-full">
                 <Header conversation={conversation} />
                 <Body intialMessages={messages} />

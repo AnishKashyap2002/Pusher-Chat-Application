@@ -8,8 +8,8 @@ const Home = () => {
 
     return (
         <div
-            className={`lg:pl-80 h-full lg:block
-      ${isOpen ? "block" : "hidden"}`}
+            className={`lg:ml-80 absolute -z-30 lg:w-[700px] h-full lg:block
+            ${isOpen ? "block" : "hidden"}`}
         >
             <EmptyState />
         </div>

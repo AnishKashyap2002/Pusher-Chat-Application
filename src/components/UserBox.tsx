@@ -28,7 +28,7 @@ export default function UserBox({ user }: { user: User }) {
             <div
                 className="flex  gap-2 items-center
             hover:bg-gray-200 cursor-pointer
-            z-40  relative pr-4  py-2
+             relative pr-4  py-2 z-50
             "
                 onClick={handleClick}
             >

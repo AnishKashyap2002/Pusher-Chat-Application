@@ -23,7 +23,7 @@ export default function DesktopSideBar({ currentUser }: DesktopSideBarProps) {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
             />
-            <div className="hidden lg:fixed lg:flex justify-between flex-col h-full lg:z-40 lg:overflow-auto">
+            <div className="hidden lg:fixed  lg:flex justify-between flex-col h-full lg:z-40 lg:overflow-auto">
                 <nav>
                     <ul role="list">
                         {routes.map((item) => (

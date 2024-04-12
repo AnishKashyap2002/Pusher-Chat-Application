@@ -11,11 +11,12 @@ export default function UserList({ users }: UserListProps) {
         <div
             className=" fixed
          lg:left-20 lg:w-80
-    bg-gray-100 h-full w-fit z-10"
+         overflow-auto
+    bg-gray-100 h-full w-fit z-30 pb-20"
         >
             <div className="px-4 py-2 flex flex-col flex-1 gap-2">
                 <h1 className="text-lg font-bold ">People</h1>
-                <div className="flex flex-col gap-1 mt-2">
+                <div className="flex flex-col gap-1 mt-2 ">
                     {users.map((user) => (
                         <UserBox
                             key={user.email}
