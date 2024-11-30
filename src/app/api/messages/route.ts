@@ -66,7 +66,11 @@ export async function POST(request: Request) {
 
         // console.log("This is the new message", updatedConversation.messages);
 
-        await pusherServer.trigger(conversationId, "messages:new", newMessage);
+        await pusherServer
+            .trigger(conversationId, "messages:new", newMessage)
+            .catch((err) => {
+                console.error("Pusher trigger Message new:", err);
+            });
         console.log("This thing is triggered bitch", conversationId);
 
         const lastMessage =
@@ -74,11 +78,19 @@ export async function POST(request: Request) {
                 updatedConversation.messages.length - 1
             ];
 
+        if (!lastMessage) {
+            return NextResponse.json({});
+        }
+
         updatedConversation.users.map((user) => {
-            pusherServer.trigger(user.email!, "conversation:update", {
-                id: conversationId,
-                messages: [lastMessage],
-            });
+            pusherServer
+                .trigger(user.email!, "conversation:update", {
+                    id: conversationId,
+                    messages: [lastMessage],
+                })
+                .catch((err) => {
+                    console.error("Pusher trigger Conversation Update:", err);
+                });
         });
 
         return NextResponse.json(newMessage);
