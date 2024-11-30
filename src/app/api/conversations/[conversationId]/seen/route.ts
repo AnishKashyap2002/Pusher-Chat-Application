@@ -59,20 +59,24 @@ export async function POST(request: Request, { params }: { params: IParams }) {
                 },
             },
         });
-        await pusherServer.trigger(currentUser.email!, "conversation:update", {
-            id: conversationId,
-            messages: [updatedMessage],
-        });
+        await pusherServer
+            .trigger(currentUser.email!, "conversation:update", {
+                id: conversationId,
+                messages: [updatedMessage],
+            })
+            .catch((err) => {
+                console.error("Pusher trigger Conversation update:", err);
+            });
 
         if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {
             return NextResponse.json(updatedMessage);
         }
 
-        await pusherServer.trigger(
-            conversationId!,
-            "messages:update",
-            updatedMessage
-        );
+        await pusherServer
+            .trigger(conversationId!, "messages:update", updatedMessage)
+            .catch((err) => {
+                console.error("Pusher trigger Messages update:", err);
+            });
 
         return NextResponse.json(updatedMessage);
 

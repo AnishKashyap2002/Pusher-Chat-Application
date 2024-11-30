@@ -48,11 +48,6 @@ export async function POST(request: Request) {
             },
             data: {
                 lastMessageAt: new Date(),
-                // messages: {
-                //     connect: {
-                //         id: newMessage.id,
-                //     },
-                // },
                 messages: {
                     connect: {
                         id: newMessage.id,
