@@ -85,11 +85,11 @@ export async function POST(request: Request) {
                     "bytes"
                 );
             });
-        console.log("Payload to Pusher:", newMessage);
+        console.log("Payload to Pusher:", base64Message);
 
         console.log(
             "Payload Size:",
-            Buffer.byteLength(JSON.stringify(newMessage)),
+            Buffer.byteLength(JSON.stringify(base64Message)),
             "bytes"
         );
 
@@ -102,16 +102,21 @@ export async function POST(request: Request) {
             return NextResponse.json({});
         }
 
-        // updatedConversation.users.map((user) => {
-        //     pusherServer
-        //         .trigger(user.email!, "conversation:update", {
-        //             id: conversationId,
-        //             messages: [lastMessage],
-        //         })
-        //         .catch((err) => {
-        //             console.error("Pusher trigger Conversation Update:", err);
-        //         });
-        // });
+        updatedConversation.users.map((user) => {
+            const conv = {
+                id: conversationId,
+                messages: [lastMessage],
+            };
+
+            const compressedConv = zlib.gzipSync(JSON.stringify(conv));
+            const base64Conv = compressedConv.toString("base64");
+
+            pusherServer
+                .trigger(user.email!, "conversation:update", base64Conv)
+                .catch((err) => {
+                    console.error("Pusher trigger Conversation Update:", err);
+                });
+        });
 
         return NextResponse.json(newMessage);
     } catch (error) {

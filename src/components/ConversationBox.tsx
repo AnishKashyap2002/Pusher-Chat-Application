@@ -63,9 +63,11 @@ export default function ConversationBox({
 
     return (
         <div
-            className="w-full hover:bg-gray-100 text-sm
-        rounded-lg  py-2 cursor-pointer flex items-center gap-2
-        "
+            className={`w-full hover:bg-gray-100 text-sm
+        rounded-lg  py-2 cursor-pointer ${
+            selected ? "bg-gray-200" : "bg-white"
+        } flex items-center gap-2
+        `}
             onClick={handleClick}
         >
             {data.isGroup ? (

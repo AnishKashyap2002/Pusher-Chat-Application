@@ -2,6 +2,7 @@ import getCurrentuser from "@/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prismaDb";
 import { pusherServer } from "@/libs/pusher";
+import zlib from "zlib";
 
 interface IParams {
     conversationId: string;
@@ -39,17 +40,21 @@ export async function DELETE(
                 },
             },
         });
+        const compressedData = zlib.gzipSync(
+            JSON.stringify(existingConversation)
+        );
+        const base64Data = compressedData.toString("base64"); // Convert to Base64
 
+        // Send compressed data via Pusher
         existingConversation.users.forEach((user) => {
             if (user.email) {
                 pusherServer.trigger(
                     user.email,
                     "conversation:remove",
-                    existingConversation
+                    base64Data // Send compressed message
                 );
             }
         });
-
         //delete the conversation record
         const updateUser = await prisma.user.update({
             where: {

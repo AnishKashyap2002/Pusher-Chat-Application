@@ -2,6 +2,7 @@ import getCurrentuser from "@/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prismaDb";
 import { pusherServer } from "@/libs/pusher";
+import zlib from "zlib";
 
 interface IParams {
     conversationId: string;
@@ -59,28 +60,43 @@ export async function POST(request: Request, { params }: { params: IParams }) {
                 },
             },
         });
-        await pusherServer
-            .trigger(currentUser.email!, "conversation:update", {
+        // Compress the conversation update payload
+        const compressedData = zlib.gzipSync(
+            JSON.stringify({
                 id: conversationId,
                 messages: [updatedMessage],
             })
+        );
+
+        // Convert to Base64
+        const base64Data = compressedData.toString("base64");
+
+        await pusherServer
+            .trigger(currentUser.email!, "conversation:update", base64Data)
             .catch((err) => {
                 console.error(
                     "Pusher trigger Conversation update:",
-                    err + " " + updatedMessage
+                    err,
+                    "Payload:",
+                    updatedMessage
                 );
             });
-
         if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {
             return NextResponse.json(updatedMessage);
         }
 
+        const compressedMessageData = zlib.gzipSync(
+            JSON.stringify(updatedMessage)
+        );
+
+        // Convert to Base64
+        const base64MessageData = compressedMessageData.toString("base64");
+
         await pusherServer
-            .trigger(conversationId!, "messages:update", updatedMessage)
+            .trigger(conversationId!, "messages:update", base64MessageData)
             .catch((err) => {
                 console.error("Pusher trigger Messages update:", err);
             });
-
         return NextResponse.json(updatedMessage);
 
         // return NextResponse.json({ message: "success" });

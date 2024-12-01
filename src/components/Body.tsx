@@ -19,6 +19,26 @@ export default function Body({ intialMessages }: BodyProps) {
 
     const { conversationId } = useConversation();
 
+    const decompressData = (compressedBase64Data: string) => {
+        try {
+            // Decode Base64 into binary data
+            const binaryString = atob(compressedBase64Data);
+            const binaryData = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                binaryData[i] = binaryString.charCodeAt(i);
+            }
+
+            // Decompress using pako
+            const decompressedData = pako.ungzip(binaryData, { to: "string" });
+
+            // Parse the decompressed JSON
+            return JSON.parse(decompressedData);
+        } catch (error) {
+            console.error("Decompression failed:", error);
+            return null;
+        }
+    };
+
     useEffect(() => {
         axios.post(`/api/conversations/${conversationId}/seen`);
     }, [conversationId]);
@@ -57,7 +77,9 @@ export default function Body({ intialMessages }: BodyProps) {
                 console.error("Decompression failed:", error);
             }
         };
-        const updateMessageHandler = (newMessage: FullMessageType) => {
+        const updateMessageHandler = (compressedBase64Data: string) => {
+            const newMessage = decompressData(compressedBase64Data);
+
             setMessages((current) =>
                 current.map((currentMessage) => {
                     if (currentMessage.id === newMessage.id) {

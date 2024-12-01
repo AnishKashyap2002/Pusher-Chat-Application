@@ -11,6 +11,7 @@ import ConversationBox from "./ConversationBox";
 import GroupChatModal from "./GroupChatModal";
 import { pusherClient } from "@/libs/pusher";
 import { find } from "lodash";
+import pako from "pako";
 
 interface ConversationListProps {
     initialItems: FullConversationType[];
@@ -22,6 +23,7 @@ export default function ConversationList({
     users,
 }: ConversationListProps) {
     const [items, setItems] = useState(initialItems);
+    const [forceUpdate, setForceUpdate] = useState(0);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -33,6 +35,21 @@ export default function ConversationList({
     const pusherKey = useMemo(() => {
         return session?.data?.user?.email;
     }, [session.data?.user?.email]);
+
+    const updateState = (conversation: FullConversationType) => {
+        setItems((current) => {
+            const updatedConversations = current.map((currentConversation) => {
+                if (currentConversation.id === conversation.id) {
+                    return {
+                        ...currentConversation,
+                        messages: [...conversation.messages],
+                    };
+                }
+                return currentConversation;
+            });
+            return updatedConversations;
+        });
+    };
 
     useEffect(() => {
         if (!pusherKey) {
@@ -48,29 +65,51 @@ export default function ConversationList({
             });
         };
 
-        const updateHandler = (conversation: {
-            id: string;
-            messages: FullMessageType[];
-        }) => {
-            setItems((current) =>
-                current.map((currentConversation) => {
-                    if (currentConversation.id === conversation.id) {
-                        return {
-                            ...currentConversation,
-                            messages: conversation.messages,
-                        };
-                    }
-                    return currentConversation;
-                })
-            );
+        const updateHandler = (compressedBase64Conv: string) => {
+            console.log("Conversation update triggered");
+
+            const binaryString = atob(compressedBase64Conv);
+            const binaryData = new Uint8Array(binaryString.length);
+
+            for (let i = 0; i < binaryString.length; i++) {
+                binaryData[i] = binaryString.charCodeAt(i);
+            }
+
+            // Decompress the binary data
+            const decompressedData = pako.ungzip(binaryData, {
+                to: "string",
+            });
+
+            // Parse the decompressed JSON
+            const conversation = JSON.parse(decompressedData);
+            updateState(conversation);
+
+            console.log(items);
         };
 
-        const removeHandler = (conversation: FullConversationType) => {
-            setItems((current) => {
-                return [
-                    ...current.filter((convo) => conversation.id !== convo.id),
-                ];
-            });
+        const removeHandler = (compressedBase64Data: string) => {
+            try {
+                // Decode Base64 into a binary string
+                const binaryString = atob(compressedBase64Data);
+                const binaryData = new Uint8Array(binaryString.length);
+
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryData[i] = binaryString.charCodeAt(i);
+                }
+
+                // Decompress the binary data
+                const decompressedData = pako.ungzip(binaryData, {
+                    to: "string",
+                });
+
+                // Parse the decompressed JSON
+                const conversation = JSON.parse(decompressedData);
+
+                // Call the remove handler with decompressed conversation
+                removeHandler(conversation);
+            } catch (error) {
+                console.error("Decompression failed:", error);
+            }
         };
 
         pusherClient.subscribe(pusherKey);
@@ -109,7 +148,7 @@ export default function ConversationList({
                         </div>
                     </div>
                     <div className="">
-                        {initialItems.map((item) => (
+                        {items.map((item) => (
                             <ConversationBox
                                 key={item.id}
                                 data={item}

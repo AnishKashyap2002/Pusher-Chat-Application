@@ -3,6 +3,7 @@ import prisma from "@/libs/prismaDb";
 import { NextResponse } from "next/server";
 import getCurrentuser from "@/actions/getCurrentUser";
 import { pusherServer } from "@/libs/pusher";
+import zlib from "zlib";
 
 export async function POST(request: Request) {
     try {
@@ -46,10 +47,19 @@ export async function POST(request: Request) {
             // console.log(newConversation);
             newConversation.users.forEach((user) => {
                 if (user.email) {
+                    // Compress the `newConversation` object
+                    const compressedData = zlib.gzipSync(
+                        JSON.stringify(newConversation)
+                    );
+
+                    // Convert compressed data to Base64 for safe transport
+                    const base64Data = compressedData.toString("base64");
+
+                    // Trigger the event with the compressed payload
                     pusherServer.trigger(
                         user.email,
                         "conversation:new",
-                        newConversation
+                        base64Data // Send Base64-compressed data
                     );
                 }
             });
