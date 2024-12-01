@@ -65,7 +65,10 @@ export async function POST(request: Request, { params }: { params: IParams }) {
                 messages: [updatedMessage],
             })
             .catch((err) => {
-                console.error("Pusher trigger Conversation update:", err);
+                console.error(
+                    "Pusher trigger Conversation update:",
+                    err + " " + updatedMessage
+                );
             });
 
         if (lastMessage.seenIds.indexOf(currentUser.id) !== -1) {

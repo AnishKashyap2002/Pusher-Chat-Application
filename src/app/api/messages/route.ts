@@ -42,6 +42,8 @@ export async function POST(request: Request) {
             },
         });
 
+        console.log("This is the newMessage", newMessage);
+
         const updatedConversation = await prisma.conversation.update({
             where: {
                 id: conversationId,
@@ -70,8 +72,21 @@ export async function POST(request: Request) {
             .trigger(conversationId, "messages:new", newMessage)
             .catch((err) => {
                 console.error("Pusher trigger Message new:", err);
+                console.log("Payload to Pusher:", newMessage);
+
+                console.log(
+                    "Payload Size:",
+                    Buffer.byteLength(JSON.stringify(newMessage)),
+                    "bytes"
+                );
             });
-        console.log("This thing is triggered bitch", conversationId);
+        console.log("Payload to Pusher:", newMessage);
+
+        console.log(
+            "Payload Size:",
+            Buffer.byteLength(JSON.stringify(newMessage)),
+            "bytes"
+        );
 
         const lastMessage =
             updatedConversation.messages[
@@ -82,16 +97,16 @@ export async function POST(request: Request) {
             return NextResponse.json({});
         }
 
-        updatedConversation.users.map((user) => {
-            pusherServer
-                .trigger(user.email!, "conversation:update", {
-                    id: conversationId,
-                    messages: [lastMessage],
-                })
-                .catch((err) => {
-                    console.error("Pusher trigger Conversation Update:", err);
-                });
-        });
+        // updatedConversation.users.map((user) => {
+        //     pusherServer
+        //         .trigger(user.email!, "conversation:update", {
+        //             id: conversationId,
+        //             messages: [lastMessage],
+        //         })
+        //         .catch((err) => {
+        //             console.error("Pusher trigger Conversation Update:", err);
+        //         });
+        // });
 
         return NextResponse.json(newMessage);
     } catch (error) {
