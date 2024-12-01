@@ -7,6 +7,7 @@ import MessageBox from "./MessageBox";
 import axios from "axios";
 import { pusherClient } from "@/libs/pusher";
 import { find } from "lodash";
+import pako from "pako";
 
 interface BodyProps {
     intialMessages: FullMessageType[];
@@ -25,17 +26,36 @@ export default function Body({ intialMessages }: BodyProps) {
     useEffect(() => {
         pusherClient.subscribe(conversationId);
         // console.log("Request made");
-        const messageHandler = (message: FullMessageType) => {
-            axios.post(`/api/conversations/${conversationId}/seen`);
-            setMessages((current) => {
-                if (find(current, { id: message.id })) {
-                    return current;
+        const messageHandler = (compressedBase64Message: string) => {
+            try {
+                // Decode Base64 into a Uint8Array
+                const binaryString = atob(compressedBase64Message);
+                const binaryData = new Uint8Array(binaryString.length);
+
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryData[i] = binaryString.charCodeAt(i);
                 }
-                return [...current, message];
-            });
-            bottomRef.current?.scrollIntoView({
-                behavior: "smooth",
-            });
+
+                // Decompress the binary data
+                const decompressedData = pako.ungzip(binaryData, {
+                    to: "string",
+                });
+
+                // Parse the decompressed JSON
+                const message = JSON.parse(decompressedData);
+
+                // Update the state with the new message
+                setMessages((current) => {
+                    if (find(current, { id: message.id })) {
+                        return current;
+                    }
+                    return [...current, message];
+                });
+
+                bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            } catch (error) {
+                console.error("Decompression failed:", error);
+            }
         };
         const updateMessageHandler = (newMessage: FullMessageType) => {
             setMessages((current) =>

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/libs/prismaDb";
 import { pusherServer } from "@/libs/pusher";
 
+import zlib from "zlib";
+
 export async function POST(request: Request) {
     // console.log(request.credentials);
     try {
@@ -42,6 +44,9 @@ export async function POST(request: Request) {
             },
         });
 
+        const compressedMessage = zlib.gzipSync(JSON.stringify(newMessage));
+        const base64Message = compressedMessage.toString("base64");
+
         console.log("This is the newMessage", newMessage);
 
         const updatedConversation = await prisma.conversation.update({
@@ -69,14 +74,14 @@ export async function POST(request: Request) {
         // console.log("This is the new message", updatedConversation.messages);
 
         await pusherServer
-            .trigger(conversationId, "messages:new", newMessage)
+            .trigger(conversationId, "messages:new", base64Message)
             .catch((err) => {
                 console.error("Pusher trigger Message new:", err);
-                console.log("Payload to Pusher:", newMessage);
+                console.log("Payload to Pusher:", base64Message);
 
                 console.log(
                     "Payload Size:",
-                    Buffer.byteLength(JSON.stringify(newMessage)),
+                    Buffer.byteLength(JSON.stringify(base64Message)),
                     "bytes"
                 );
             });
